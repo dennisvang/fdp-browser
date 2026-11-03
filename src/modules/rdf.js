@@ -2,8 +2,7 @@
 // https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
-const N3 = require('n3');
-const { DataFactory, Parser, Store } = N3;
+import { DataFactory, Parser, Store } from "n3";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
