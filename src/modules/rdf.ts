@@ -11,7 +11,7 @@ import {
     type Quad_Subject,
     Store
 } from "n3";
-import { type Dataset, type Stream } from "@rdfjs/types";
+import { type Stream } from "@rdfjs/types";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
@@ -20,21 +20,15 @@ const LDP_HASMEMBER_RELATION = "http://www.w3.org/ns/ldp#hasMemberRelation"
 const PREFIX_URI_FDPO = "https://w3id.org/fdp/fdp-o#";
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
-type PrefixMap = {[prefix: string]: string | null};
+type PrefixMap = {[prefix: string]: string};
 const KNOWN_PREFIX_MAP: PrefixMap = {
     "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
-    "http://www.w3.org/1999/02/22-rdf-syntax-ns#": null,  // works as is
-    "http://www.w3.org/2000/01/rdf-schema#": null,  // works as is
-    // "http://www.w3.org/2001/XMLSchema#": null,  // fails: CORS header missing and only available as XML
-    "http://www.w3.org/ns/dcat#": null,  // works as is
-    "http://www.w3.org/ns/ldp#": null,  // works as is
-    // "http://xmlns.com/foaf/0.1/": null,  // fails: only available as XML
     [PREFIX_URI_FDPO]: "ontologies/fdp-o.ttl",  // only available as XML so use custom ttl
 };
 
 /** Maintains rdf store state */
 export class RdfStore {
-    #prefixes: {[prefix: string]: string};
+    #prefixes: PrefixMap;
     #store: Store;
 
     constructor() {
@@ -151,7 +145,7 @@ export class RdfStore {
     }
 
     /** Returns known prefixes (populated via parser) */
-    getPrefixes(): {[prefix: string]: string} {
+    getPrefixes(): PrefixMap {
         return this.#prefixes;
     }
 
