@@ -2,7 +2,7 @@
 // https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
-import { DataFactory, Parser, Store } from "n3";
+import {DataFactory, Parser, Store} from "n3";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
@@ -37,7 +37,7 @@ export class RdfStore {
      * Parses an RDF turtle string into the triple store using the specified uri as
      * graph uri. Also updates the #prefixes object.
      */
-    async parseTurtle(turtle, uri) {
+    async parseTurtle(turtle: string, uri: string): Promise<void> {
         // return a promise so we can handle parsing errors properly
         return new Promise((resolve, reject) => {
             // use a dedicated graph for each parsed uri
