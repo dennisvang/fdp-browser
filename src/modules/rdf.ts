@@ -65,9 +65,12 @@ export class RdfStore {
 
     /**
      * Returns an array of IRIs representing parents and children of the specified
-     * RDF subject. These represent navigation links.
+     * RDF subject. These represent navigation links. Note that we would ideally have a
+     * single subjectIri argument, but we need to accept an array for the trailing slash
+     * workaround.
      */
-    getRelatedResourceIris(subjectIris) {
+    getRelatedResourceIris(subjectIris: string[]): string[] {
+        // todo: clean up the workaround mess
         // as a workaround for the possible trailing slash discrepancy between root
         // subject URI and base URI, we need to consider multiple URIs...
         // however, ideally we would only have to consider a single subject URI
