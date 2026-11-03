@@ -1,4 +1,4 @@
-import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.js";
+import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.ts";
 
 const CLASS_CLICKABLE = "clickable";
 const CLASS_RDF_STATEMENT = "rdf-statement";
