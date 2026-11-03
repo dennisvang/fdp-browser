@@ -24,8 +24,8 @@ const KNOWN_PREFIX_MAP = {
 
 /** Maintains rdf store state */
 export class RdfStore {
-    #prefixes;
-    #store;
+    #prefixes: {[prefix: string]: string};
+    #store: Store;
 
     constructor() {
         // always add the fdp-o prefix
