@@ -2,7 +2,16 @@
 // https://rdf.js.org/N3.js/ (docs)
 // https://www.rubensworks.net/blog/2019/10/06/using-rdf-in-javascript/
 
-import {DataFactory, Parser, Store} from "n3";
+import {
+    DataFactory,
+    Parser,
+    Quad,
+    type Quad_Object,
+    type Quad_Predicate,
+    type Quad_Subject,
+    Store
+} from "n3";
+import { type Dataset, type Stream } from "@rdfjs/types";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
@@ -11,7 +20,8 @@ const LDP_HASMEMBER_RELATION = "http://www.w3.org/ns/ldp#hasMemberRelation"
 const PREFIX_URI_FDPO = "https://w3id.org/fdp/fdp-o#";
 
 // map known prefix URIs to URLs that can be resolved from a browser (w.r.t. CORS, XML, etc.)
-const KNOWN_PREFIX_MAP = {
+type PrefixMap = {[prefix: string]: string | null};
+const KNOWN_PREFIX_MAP: PrefixMap = {
     "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#": null,  // works as is
     "http://www.w3.org/2000/01/rdf-schema#": null,  // works as is
@@ -116,31 +126,32 @@ export class RdfStore {
     }
 
     /** Returns true if the specified graph exists */
-    graphExists(graphUri) {
+    graphExists(graphUri: string): boolean {
         return this.#store.has(null, null, null, DataFactory.namedNode(graphUri));
     }
 
     /**
      * Gets all RDF subjects from the specified resource's graph.
      */
-    getSubjectsForGraph(graphUri) {
+    getSubjectsForGraph(graphUri: string): Quad_Subject[] {
         return this.#store.getSubjects(null, null, DataFactory.namedNode(graphUri));
     }
 
     /**
      * Returns all RDF quads from the specified resource's graph matching the subject.
      */
-    getQuadsForGraphSubject(graphUri, subject) {
-        return this.#store.match(subject, null, null, DataFactory.namedNode(graphUri));
+    getQuadsForGraphSubject(graphUri: string, subject: Quad_Subject): Stream<Quad> {
+        // todo: check if forcing return type is ok here
+        return this.#store.match(subject, null, null, DataFactory.namedNode(graphUri)) as Stream<Quad>;
     }
 
     /** Returns all RDF objects matching the subject and predicate, from all graphs */
-    getObjectsForSubjectAndPredicate(subject, predicate) {
+    getObjectsForSubjectAndPredicate(subject: Quad_Subject, predicate:Quad_Predicate): Quad_Object[] {
         return this.#store.getObjects(subject, predicate, null);
     }
 
     /** Returns known prefixes (populated via parser) */
-    getPrefixes() {
+    getPrefixes(): {[prefix: string]: string} {
         return this.#prefixes;
     }
 
@@ -150,7 +161,7 @@ export class RdfStore {
      * ontologies are not properly configured for CORS and some are only available in
      * XML, which cannot be parsed by our n3.js.
      */
-    workaroundPrefixUri(uri) {
+    workaroundPrefixUri(uri: string): string {
         const workaroundUri = KNOWN_PREFIX_MAP[uri] || uri;
         if (workaroundUri !== uri) console.info("using prefix workaround for " + uri);
         return workaroundUri;
