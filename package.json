@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@types/n3": "^1.26.6",
+    "esbuild": "0.28.2"
+  },
+  "dependencies": {
+    "n3": "^2.13.12"
+  }
+}
