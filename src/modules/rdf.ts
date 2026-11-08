@@ -11,7 +11,7 @@ import {
     type Quad_Subject,
     Store
 } from "n3";
-import type { Stream } from "@rdfjs/types";
+import type { Dataset, Stream } from "@rdfjs/types";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
@@ -134,9 +134,9 @@ export class RdfStore {
     /**
      * Returns all RDF quads from the specified resource's graph matching the subject.
      */
-    getQuadsForGraphSubject(graphUri: string, subject: Quad_Subject): Stream<Quad> {
+    getQuadsForGraphSubject(graphUri: string, subject: Quad_Subject): Stream<Quad> & Dataset<Quad, Quad> {
         // todo: check if forcing return type is ok here
-        return this.#store.match(subject, null, null, DataFactory.namedNode(graphUri)) as Stream<Quad>;
+        return this.#store.match(subject, null, null, DataFactory.namedNode(graphUri)) as Stream<Quad> & Dataset<Quad, Quad>;
     }
 
     /** Returns all RDF objects matching the subject and predicate, from all graphs */
