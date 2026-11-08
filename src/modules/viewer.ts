@@ -1,4 +1,5 @@
-import { MEDIATYPE_TURTLE, RdfStore } from "./rdf.ts";
+import { MEDIATYPE_TURTLE, RdfStore } from "./rdf";
+import type {Quad, Quad_Subject, Term} from "n3";
 
 const CLASS_CLICKABLE = "clickable";
 const CLASS_RDF_STATEMENT = "rdf-statement";
@@ -17,12 +18,12 @@ const PARAM_NAVIGATION_URL = "nav-url";
 /** Maintains resource viewer state */
 export class ResourceViewer {
     // private elements
-    #container;
-    #rdfStore;
-    #relatedResourceIris;
-    #rootUrl;
+    #container: HTMLDivElement;
+    #rdfStore: RdfStore;
+    #relatedResourceIris: string[];
+    #rootUrl: string;
 
-    constructor(container, rootUrl) {
+    constructor(container: HTMLDivElement, rootUrl: string) {
         this.#container = container;
         this.#rootUrl = rootUrl;
         // initialize empty
@@ -34,7 +35,7 @@ export class ResourceViewer {
     }
 
     /** Handles navigation events using the JavaScript navigation API */
-    #navigationHandler(event) {
+    #navigationHandler(event: NavigateEvent): void {
         console.debug("nav event detected: %s, %s", event.navigationType, event.destination.url)
         // only same-origin navigation is handled here, which implies an internal
         // nav-url parameter is available
@@ -55,16 +56,16 @@ export class ResourceViewer {
      * reasoning, human readable labels, and so on.
      * Then navigates to the root URL to populate the page.
      */
-    async initialize() {
+    async initialize(): Promise<void> {
         // navigate to root URL, using history "replace" to prevent the user from
         // going back to any previous root URL (from different FDP)
-        const destinationUrl = new URL(window.location);
+        const destinationUrl = new URL(window.location.toString());
         destinationUrl.searchParams.set(PARAM_NAVIGATION_URL, this.#rootUrl);
         navigation.navigate(destinationUrl, {"history": "replace"});
     }
 
     /** Updates the whole content based on the specified url */
-    async #update(url) {
+    async #update(url: string | null): Promise<void> {
         // fall back on root url if no url was provided
         const resourceUrl = url || this.#rootUrl;
         // harvest resource statements and add them to the rdf store
@@ -81,7 +82,7 @@ export class ResourceViewer {
      * This is an ugly workaround for possible mismatch between scheme and path of the
      * HTTP request URL and the RDF subject URI.
      */
-    #workaroundPossibleSubjectIris(resourceUrl) {
+    #workaroundPossibleSubjectIris(resourceUrl: string): string[] {
         console.info("using subject URI workaround...")
         let subjectIris = [resourceUrl];
         const url = new URL(resourceUrl);
@@ -102,7 +103,7 @@ export class ResourceViewer {
     }
 
     /** Replaces IRIs with corresponding prefixes */
-    #withPrefixes(value) {
+    #withPrefixes(value: string): string {
         for (const [prefix, prefixIRI] of Object.entries(this.#rdfStore.getPrefixes())) {
             value = value.replace(prefixIRI, prefix + ":");
         }
@@ -110,7 +111,7 @@ export class ResourceViewer {
     }
 
     /** Tries to get a human readable label for an IRI */
-    #getLabel(iri, language="en") {
+    #getLabel(iri: string, language="en"): string {
         // default to prefix substitution
         let label = this.#withPrefixes(iri);
         // try to get actual label for iri
@@ -139,7 +140,7 @@ export class ResourceViewer {
      * title which appears on mouse-hover, for improved readability.
      * Automatically distinguishes between cross-origin and same-origin IRIs.
      */
-    #createElementIRI(iri, ...classes) {
+    #createElementIRI(iri:string, ...classes: string[]): HTMLAnchorElement {
         const labelIri = iri;
         let navigationIri = iri;
         let navigationTarget = "_blank";
@@ -148,7 +149,7 @@ export class ResourceViewer {
             // highlight the element via css class
             classes.push(CLASS_NAVIGATION_RESOURCE);
             // convert href for same-origin navigation with the term.id as url param
-            const location = new URL(window.location);
+            const location = new URL(window.location.toString());
             location.searchParams.set(PARAM_NAVIGATION_URL, iri);
             navigationIri = location.href;
             navigationTarget = "_self";
@@ -160,13 +161,13 @@ export class ResourceViewer {
         iriElement.title = this.#withPrefixes(labelIri);
         iriElement.target = navigationTarget;
         if (classes && classes.length) {
-            iriElement.classList.add(classes);
+            iriElement.classList.add(...classes);
         }
         return iriElement;
     }
 
     /** Creates an HTML element for a fancy clickable title */
-    #createElementForSubjectTitle(iri) {
+    #createElementForSubjectTitle(iri: string): HTMLDivElement {
         const titleElement = document.createElement("div");
         titleElement.classList.add(CLASS_TITLE);
         titleElement.appendChild(this.#createElementIRI(iri, CLASS_SUBJECT_TITLE));
@@ -176,13 +177,13 @@ export class ResourceViewer {
     /**
      * Creates an HTML element representing an RDF term (subject, predicate, or object)
      */
-    #createElementForTerm(term) {
+    #createElementForTerm(term: Term): HTMLSpanElement {
         let termElement;
         if (term.termType === "Literal") {
             termElement = document.createElement("span");
             termElement.textContent = this.#withPrefixes(term.id);
         } else {
-            const elementClasses = [];
+            const elementClasses: string[] = [];
             termElement = this.#createElementIRI(term.id, ...elementClasses);
         }
         termElement.classList.add(CLASS_RDF_TERM);
@@ -193,10 +194,11 @@ export class ResourceViewer {
      * Creates an HTML element containing a single RDF statement,
      * consisting of RDF terms <subject> <predicate> <object>.
      */
-    #createElementForStatement(quad) {
+    #createElementForStatement(quad: Quad) {
         let statementElement = document.createElement("div");
         statementElement.classList.add(CLASS_RDF_STATEMENT);
-        for (const termName of ["subject", "predicate", "object"]) {
+        // as const to let typescript know the values are valid properties of Quad
+        for (const termName of ["subject", "predicate", "object"] as const) {
             const element = this.#createElementForTerm(quad[termName]);
             element.classList.add("rdf-" + termName);
             statementElement.appendChild(element);
@@ -207,7 +209,7 @@ export class ResourceViewer {
     /**
      * Creates an HTML element containing all RDF statements for the given RDF subject
      */
-    #createElementForSubject(url, subject) {
+    #createElementForSubject(url: string, subject:Quad_Subject): HTMLDivElement {
         const subjectElement = document.createElement("div");
         subjectElement.classList.add(CLASS_SUBJECT);
         subjectElement.id = subject.id;
@@ -219,7 +221,7 @@ export class ResourceViewer {
     }
 
     /** Creates an HTML element for a prefix that triggers harvesting on click */
-    #createElementForPrefix(prefix, uri) {
+    #createElementForPrefix(prefix: string, uri:string): HTMLDivElement {
         const prefixElement = document.createElement("div");
         prefixElement.classList.add(CLASS_PREFIX);
         prefixElement.textContent = prefix;
@@ -234,7 +236,7 @@ export class ResourceViewer {
     }
 
     /** Creates an HTML element that contains links for all the prefixes */
-    #createElementForPrefixes() {
+    #createElementForPrefixes(): HTMLDivElement {
         const prefixesElement = document.createElement("div");
         prefixesElement.classList.add(CLASS_PREFIXES);
         const titleElement = document.createElement("div");
@@ -260,7 +262,7 @@ export class ResourceViewer {
      * Populates the content container based on statements from the RDF store about
      * the specified resource. The container is cleared first.
      */
-    async #populate(url) {
+    async #populate(url: string): Promise<void> {
         // clear
         this.#container.replaceChildren();
         // show prefixes
@@ -276,7 +278,7 @@ export class ResourceViewer {
      * specified URL. Each resource representation is stored in its own graph,
      * identified by the resource url.
      */
-    async #harvest(url) {
+    async #harvest(url: string): Promise<void> {
         if (this.#rdfStore.graphExists(url)) {
             console.debug("skipping %s because it has already been harvested", url)
             return;
@@ -288,7 +290,7 @@ export class ResourceViewer {
     }
 
     /** Executes an HTTP GET request for RDF turtle and returns the response body as text */
-    async #requestTurtle(url) {
+    async #requestTurtle(url: string): Promise<string> {
         // enforce https
         url = url.replace("http://", "https://");
         // specify options to get rdf-turtle
@@ -307,15 +309,19 @@ export class ResourceViewer {
     }
 
     /** Triggers harvesting of the specified prefix URI */
-    #prefixCallback(event) {
-        // should we check that the event.target has prefix class?
-        const prefix = event.target.textContent;
-        const prefixUri = event.target.title;
-        this.#harvest(prefixUri)
-            .then(() => {
-                this.#update(window.location.search[PARAM_NAVIGATION_URL])
-                    .then(() => console.debug("updated prefix " + prefix));
-            })
-            .catch(() => event.target.classList.add(CLASS_PREFIX_FAILED));
+    #prefixCallback(event: PointerEvent): void {
+        const target: EventTarget | null = event.target;
+        if (target instanceof HTMLElement) {
+            // should we check that the event.target has prefix class?
+            const prefix = target.textContent;
+            const prefixUri = target.title;
+            this.#harvest(prefixUri)
+                .then(() => {
+                    const searchParams = new URLSearchParams(window.location.search);
+                    this.#update(searchParams.get(PARAM_NAVIGATION_URL))
+                        .then(() => console.debug("updated prefix " + prefix));
+                })
+                .catch(() => target.classList.add(CLASS_PREFIX_FAILED));
+        }
     }
 }
