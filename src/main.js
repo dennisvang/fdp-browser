@@ -1,4 +1,4 @@
-import {ResourceViewer} from "./modules/viewer.js";
+import { ResourceViewer } from "./modules/viewer.ts";
 
 // todo: consistent naming IRI/URI/URL throughout all modules
 
