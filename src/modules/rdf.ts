@@ -11,7 +11,7 @@ import {
     type Quad_Subject,
     Store
 } from "n3";
-import { type Stream } from "@rdfjs/types";
+import type { Stream } from "@rdfjs/types";
 
 export const MEDIATYPE_TURTLE = "text/turtle";
 
