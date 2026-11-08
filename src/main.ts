@@ -6,7 +6,7 @@ let viewer;
 
 const inputUrl: HTMLElement | null = document.getElementById("input-url");
 
-if (inputUrl instanceof HTMLElement) {
+if (inputUrl instanceof HTMLInputElement) {
     // create new viewer when fdp url changes
     inputUrl.addEventListener("change", async (event) => {
         const container = document.getElementById("content");
