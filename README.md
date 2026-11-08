@@ -1,3 +1,3 @@
-# fdp-viewer
+# fdp-browser
 
-A simple browser-based application that enables humans to navigate a FAIR Data Point like a machine would.
+A simple browser-based application that enables humans to browse FAIR Data Points like a machine would.
