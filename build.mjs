@@ -11,7 +11,7 @@ const outdir = 'dist'
 // bundle the js and css files
 await esbuild.build({
     entryPoints: [
-        path.join(srcdir, 'main.js'),
+        path.join(srcdir, 'main.ts'),
         path.join(srcdir, 'main.css'),
     ],
     bundle: true,
