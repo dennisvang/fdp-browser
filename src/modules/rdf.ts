@@ -138,7 +138,7 @@ export class RdfStore {
     }
 
     /** Returns all RDF objects matching the subject and predicate, from all graphs */
-    getObjectsForSubjectAndPredicate(subject: Quad_Subject, predicate:Quad_Predicate): Quad_Object[] {
+    getObjectsForSubjectAndPredicate(subject: Quad_Subject | string, predicate: Quad_Predicate | string): Quad_Object[] {
         return this.#store.getObjects(subject, predicate, null);
     }
 
