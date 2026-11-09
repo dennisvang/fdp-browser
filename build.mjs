@@ -21,6 +21,8 @@ await esbuild.build({
     target: "esnext",
 })
 
-// copy the html file to the bundle
-const filename = "index.html"
-copyFileSync(path.join(srcdir, filename), path.join(outdir, filename))
+// copy static files to the bundle dir
+const filePathComponents = [["index.html"], ["ontologies", "fdp-o.ttl"]];
+filePathComponents.forEach(pathComponents => {
+    copyFileSync(path.join(srcdir, ...pathComponents), path.join(outdir, pathComponents.at(-1)))
+});
