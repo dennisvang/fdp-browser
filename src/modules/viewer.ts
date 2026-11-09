@@ -1,5 +1,5 @@
 import { MEDIATYPE_TURTLE, RdfStore } from "./rdf";
-import type {Quad, Quad_Subject, Term} from "n3";
+import type {Quad, Quad_Object, Quad_Subject, Term} from "n3";
 
 const CLASS_CLICKABLE = "clickable";
 const CLASS_RDF_STATEMENT = "rdf-statement";
@@ -116,16 +116,14 @@ export class ResourceViewer {
     #getLabel(iri: string, language="en"): string {
         // default to prefix substitution
         let label = this.#withPrefixes(iri);
-        // try to get actual label for iri (try dcterms:title, fall back on rdfs:label)
+        // try to get actual label for iri (prefer dcterms:title, fall back on rdfs:label)
         // todo: do we need to cache this? or is that premature optimization?
-        const titles = this.#rdfStore.getObjectsForSubjectAndPredicate(
-            iri, PREDICATE_DCTERMS_TITLE
-        );
-        const labels = this.#rdfStore.getObjectsForSubjectAndPredicate(
-            iri, PREDICATE_RDFS_LABEL
-        );
+        const labels: Quad_Object[] = [];
+        [PREDICATE_DCTERMS_TITLE, PREDICATE_RDFS_LABEL].forEach(predicate => {
+            labels.push(...this.#rdfStore.getObjectsForSubjectAndPredicate(iri, predicate));
+        });
         const languageTag = "@" + language;
-        for (const labelCandidate of titles.concat(labels)) {
+        for (const labelCandidate of labels) {
             if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
                 label = labelCandidate.id.replaceAll("\"", "").replaceAll(languageTag, "");
                 // break on first match
