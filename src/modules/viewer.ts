@@ -14,6 +14,8 @@ const CLASS_SUBJECT = "subject";
 const CLASS_SUBJECT_TITLE = "subject-title";
 const CLASS_TITLE = "title";
 const PARAM_NAVIGATION_URL = "nav-url";
+const PREDICATE_DCTERMS_TITLE = "http://purl.org/dc/terms/title";
+const PREDICATE_RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
 
 /** Maintains resource viewer state */
 export class ResourceViewer {
@@ -114,11 +116,14 @@ export class ResourceViewer {
     #getLabel(iri: string, language="en"): string {
         // default to prefix substitution
         let label = this.#withPrefixes(iri);
-        // try to get actual label for iri
+        // try to get actual label for iri (try dcterms:title, fall back on rdfs:label)
         // todo: do we need to cache this? or is that premature optimization?
-        const labels = this.#rdfStore.getObjectsForSubjectAndPredicate(
-            iri, "http://www.w3.org/2000/01/rdf-schema#label"
+        const titles = this.#rdfStore.getObjectsForSubjectAndPredicate(
+            iri, PREDICATE_DCTERMS_TITLE
         );
+        const labels = titles.concat(this.#rdfStore.getObjectsForSubjectAndPredicate(
+            iri, PREDICATE_RDFS_LABEL
+        ));
         const languageTag = "@" + language;
         for (const labelCandidate of labels) {
             if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
