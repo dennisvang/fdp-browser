@@ -121,11 +121,11 @@ export class ResourceViewer {
         const titles = this.#rdfStore.getObjectsForSubjectAndPredicate(
             iri, PREDICATE_DCTERMS_TITLE
         );
-        const labels = titles.concat(this.#rdfStore.getObjectsForSubjectAndPredicate(
+        const labels = this.#rdfStore.getObjectsForSubjectAndPredicate(
             iri, PREDICATE_RDFS_LABEL
-        ));
+        );
         const languageTag = "@" + language;
-        for (const labelCandidate of labels) {
+        for (const labelCandidate of titles.concat(labels)) {
             if (labelCandidate.id.endsWith(languageTag) || !labelCandidate.id.includes("@")) {
                 label = labelCandidate.id.replaceAll("\"", "").replaceAll(languageTag, "");
                 // break on first match
