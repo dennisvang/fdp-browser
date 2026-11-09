@@ -22,7 +22,7 @@ const PREFIX_URI_FDPO = "https://w3id.org/fdp/fdp-o#";
 type PrefixMap = {[prefix: string]: string};
 const KNOWN_PREFIX_MAP: PrefixMap = {
     "http://purl.org/dc/terms/": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
-    [PREFIX_URI_FDPO]: "ontologies/fdp-o.ttl",  // only available as XML so use custom ttl
+    [PREFIX_URI_FDPO]: "fdp-o.ttl",  // only available as XML so use custom ttl
 };
 
 /** Maintains rdf store state */
