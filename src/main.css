@@ -1,10 +1,10 @@
 :root {
-    --color-success: #a98a47;
-    --color-failure: #e8662d;
-    --color-highlight: #f3bd63;
-    --color-lowlight: darkgrey;
-    --color-background: #b687b7;
-    --color-foreground: #ea9bb8;
+    --color-success: springgreen;
+    --color-failure: deeppink;
+    --color-highlight: coral;
+    --color-lowlight: darkgray;
+    --color-background: darkslateblue;
+    --color-foreground: white;
 }
 
 a {
